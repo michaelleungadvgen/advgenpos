@@ -1,5 +1,3 @@
-Here is the revised `README.md` in Markdown format:
-
 **AdvGenPOS**
 ================
 
