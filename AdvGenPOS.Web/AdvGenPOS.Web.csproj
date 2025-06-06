@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MudBlazor" Version="8.5.1" />
+    <PackageReference Include="MudBlazor.FontIcons.MaterialSymbols" Version="1.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AdvGenPOS.ServiceDefaults\AdvGenPOS.ServiceDefaults.csproj" />
   </ItemGroup>
 

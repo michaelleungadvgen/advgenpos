@@ -1,0 +1,277 @@
+﻿@page "/pos"
+@using System.Collections.Generic
+@using MudBlazor
+@inject ISnackbar Snackbar
+
+<MudLayout>
+    <!-- App Bar -->
+    <MudAppBar Elevation="1" Color="Color.Primary">
+        <MudText Typo="Typo.h5" Class="ml-3">AdvGen POS System</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Edge="Edge.End" />
+    </MudAppBar>
+
+    <!-- Main Content -->
+    <MudMainContent Class="py-4 px-3">
+        <MudGrid>
+            <!-- Left Panel (Cart) -->
+            <MudItem xs="12" md="6" Class="pe-md-2">
+                <MudPaper Elevation="2" Class="pa-0 h-100">
+                    <!-- Cart Header -->
+                    <MudToolBar Dense="true" DisableGutters="true" Class="px-3 mud-theme-primary">
+                        <MudText Typo="Typo.h6" Color="Color.Surface">Current Order</MudText>
+                        <MudSpacer />
+                        <MudIconButton Icon="@Icons.Material.Filled.Receipt" Color="Color.Surface" />
+                    </MudToolBar>
+
+                    <!-- Cart Items -->
+                    <MudContainer Class="py-4 px-2" MaxWidth="MaxWidth.False">
+                        <MudList T="CartItem" Clickable="true" Dense="true">
+                            @foreach (var item in cartItems)
+                            {
+                                <MudListItem T="CartItem" Value="@item">
+                                    <MudPaper Elevation="0" Class="d-flex flex-row pa-3" Style="background-color: #f9f9f9;">
+                                        <div class="d-flex flex-column flex-grow-1">
+                                            <div class="d-flex align-center">
+                                                <MudText Typo="Typo.body1" Style="font-weight: 500;">@item.Name</MudText>
+                                                <MudSpacer />
+                                                <MudText Typo="Typo.body1" Style="font-weight: 500;">@item.Price.ToString("C2")</MudText>
+                                            </div>
+                                            <MudText Typo="Typo.body2" Color="Color.Dark">@item.Modifications</MudText>
+                                            <div class="d-flex align-center mt-2">
+                                                <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" Color="Color.Primary" OnClick="@(() => DecreaseQuantity(item))" />
+                                                <MudText Typo="Typo.body1" Class="mx-2">@item.Quantity</MudText>
+                                                <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" Color="Color.Primary" OnClick="@(() => IncreaseQuantity(item))" />
+                                                <MudSpacer />
+                                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => RemoveItem(item))" />
+                                            </div>
+                                        </div>
+                                    </MudPaper>
+                                </MudListItem>
+                            }
+                        </MudList>
+
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-space-between mt-2 mb-4">
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Medium" OnClick="@ClearCart">Clear</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Warning" Size="Size.Medium" OnClick="@ApplyDiscount">Discount</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Medium" OnClick="@Checkout">Checkout</MudButton>
+                        </div>
+
+                        <!-- Cart Summary -->
+                        <MudPaper Elevation="0" Class="pt-4 pb-2 px-3" Style="background-color: #fafafa;">
+                            <div class="d-flex justify-space-between">
+                                <MudText Typo="Typo.body1">Subtotal</MudText>
+                                <MudText Typo="Typo.body1">@Subtotal.ToString("C2")</MudText>
+                            </div>
+                            <div class="d-flex justify-space-between my-2">
+                                <MudText Typo="Typo.body1">Tax (8%)</MudText>
+                                <MudText Typo="Typo.body1">@Tax.ToString("C2")</MudText>
+                            </div>
+                            <MudDivider Class="my-2" />
+                            <div class="d-flex justify-space-between mt-2">
+                                <MudText Typo="Typo.h6">TOTAL</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight: 500;">@Total.ToString("C2")</MudText>
+                            </div>
+                        </MudPaper>
+                    </MudContainer>
+                </MudPaper>
+            </MudItem>
+
+            <!-- Right Panel (Products) -->
+            <MudItem xs="12" md="6" Class="ps-md-2">
+                <MudPaper Elevation="2" Class="pa-0 h-100">
+                    <!-- Category Tabs -->
+                    <MudTabs Elevation="0" Color="Color.Primary" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-0">
+                        <MudTabPanel Text="Coffee" Icon="@Icons.Material.Filled.Coffee">
+                            <MudContainer Class="py-4 px-2" MaxWidth="MaxWidth.False">
+                                <MudGrid>
+                                    @foreach (var product in coffeeProducts)
+                                    {
+                                        <MudItem xs="6" sm="4">
+                                            <MudPaper Elevation="1" Class="pa-3 mb-3 d-flex flex-column align-center product-card" Style="height: 150px; cursor: pointer;" @onclick="@(() => AddToCart(product))">
+                                                <MudAvatar Color="Color.Primary" Size="Size.Large" Style="margin-bottom: 12px; opacity: 0.8;">
+                                                    <MudIcon Icon="@Icons.Material.Filled.Coffee" />
+                                                </MudAvatar>
+                                                <MudText Typo="Typo.body1" Align="Align.Center">@product.Name</MudText>
+                                                <MudText Typo="Typo.body1" Color="Color.Primary" Style="font-weight: 500;" Align="Align.Center">@product.Price.ToString("C2")</MudText>
+                                            </MudPaper>
+                                        </MudItem>
+                                    }
+                                </MudGrid>
+                            </MudContainer>
+                        </MudTabPanel>
+                        <MudTabPanel Text="Food" Icon="@Icons.Material.Filled.Restaurant">
+                            <MudContainer Class="py-4 px-2" MaxWidth="MaxWidth.False">
+                                <MudText Typo="Typo.body1" Align="Align.Center" Class="py-8">Food items would appear here.</MudText>
+                            </MudContainer>
+                        </MudTabPanel>
+                        <MudTabPanel Text="Drinks" Icon="@Icons.Material.Filled.LocalDrink">
+                            <MudContainer Class="py-4 px-2" MaxWidth="MaxWidth.False">
+                                <MudText Typo="Typo.body1" Align="Align.Center" Class="py-8">Drinks would appear here.</MudText>
+                            </MudContainer>
+                        </MudTabPanel>
+                        <MudTabPanel Text="Specials" Icon="@Icons.Material.Filled.Star">
+                            <MudContainer Class="py-4 px-2" MaxWidth="MaxWidth.False">
+                                <MudText Typo="Typo.body1" Align="Align.Center" Class="py-8">Special items would appear here.</MudText>
+                            </MudContainer>
+                        </MudTabPanel>
+                    </MudTabs>
+
+                    <!-- Bottom Navigation -->
+                    <MudPaper Elevation="0" Class="py-3 px-4 d-flex justify-space-between" Style="background-color: #fafafa;">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ViewList" DisableElevation="true">Orders</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.BarChart" Disabled="false" DisableElevation="true">Reports</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Settings" Disabled="false" DisableElevation="true">Settings</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Logout" Disabled="false" DisableElevation="true">Logout</MudButton>
+                    </MudPaper>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private List<CartItem> cartItems = new List<CartItem>();
+    private List<Product> coffeeProducts = new List<Product>();
+    
+    private decimal Subtotal => cartItems.Sum(item => item.Price * item.Quantity);
+    private decimal Tax => Subtotal * 0.08m;
+    private decimal Total => Subtotal + Tax;
+
+    protected override void OnInitialized()
+    {
+        // Populate coffee products
+        coffeeProducts = new List<Product>
+        {
+            new Product { Id = 1, Name = "Espresso", Price = 3.00m, Category = "Coffee" },
+            new Product { Id = 2, Name = "Cappuccino", Price = 4.50m, Category = "Coffee" },
+            new Product { Id = 3, Name = "Latte", Price = 4.25m, Category = "Coffee" },
+            new Product { Id = 4, Name = "Americano", Price = 3.50m, Category = "Coffee" },
+            new Product { Id = 5, Name = "Flat White", Price = 4.75m, Category = "Coffee" },
+            new Product { Id = 6, Name = "Mocha", Price = 5.00m, Category = "Coffee" },
+            new Product { Id = 7, Name = "Macchiato", Price = 4.00m, Category = "Coffee" },
+            new Product { Id = 8, Name = "Cold Brew", Price = 5.25m, Category = "Coffee" },
+            new Product { Id = 9, Name = "Iced Coffee", Price = 4.50m, Category = "Coffee" }
+        };
+
+        // Add some sample items to cart
+        cartItems.Add(new CartItem { 
+            Id = 1, 
+            Name = "Coffee - Large", 
+            Price = 5.50m, 
+            Quantity = 1, 
+            Modifications = "Extra shot, Soy milk" 
+        });
+
+        cartItems.Add(new CartItem { 
+            Id = 2, 
+            Name = "Blueberry Muffin", 
+            Price = 3.75m, 
+            Quantity = 1, 
+            Modifications = "Gluten free" 
+        });
+
+        cartItems.Add(new CartItem { 
+            Id = 3, 
+            Name = "Fresh Orange Juice", 
+            Price = 4.25m, 
+            Quantity = 1, 
+            Modifications = "Large, No ice" 
+        });
+    }
+
+    private void AddToCart(Product product)
+    {
+        // Find if item already exists in cart
+        var existingItem = cartItems.FirstOrDefault(item => item.Name == product.Name);
+        
+        if (existingItem != null)
+        {
+            // If item exists, increment quantity
+            existingItem.Quantity++;
+        }
+        else
+        {
+            // Otherwise add new item
+            var newItem = new CartItem
+            {
+                Id = cartItems.Count + 1,
+                Name = product.Name,
+                Price = product.Price,
+                Quantity = 1,
+                Modifications = ""
+            };
+            cartItems.Add(newItem);
+        }
+        
+        Snackbar.Add($"{product.Name} added to cart", Severity.Success);
+    }
+
+    private void RemoveItem(CartItem item)
+    {
+        cartItems.Remove(item);
+        Snackbar.Add("Item removed", Severity.Info);
+    }
+
+    private void IncreaseQuantity(CartItem item)
+    {
+        item.Quantity++;
+    }
+
+    private void DecreaseQuantity(CartItem item)
+    {
+        if (item.Quantity > 1)
+        {
+            item.Quantity--;
+        }
+        else
+        {
+            RemoveItem(item);
+        }
+    }
+
+    private void ClearCart()
+    {
+        cartItems.Clear();
+        Snackbar.Add("Cart cleared", Severity.Info);
+    }
+
+    private void ApplyDiscount()
+    {
+        Snackbar.Add("Discount dialog would appear here", Severity.Info);
+    }
+
+    private void Checkout()
+    {
+        Snackbar.Add("Processing payment...", Severity.Success);
+        // Here you would handle payment processing and order creation
+    }
+
+    // Model classes
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public string Category { get; set; }
+    }
+
+    public class CartItem
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+        public string Modifications { get; set; }
+    }
+}
+
+<style>
+    .product-card:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>

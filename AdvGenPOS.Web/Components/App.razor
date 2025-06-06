@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using MudBlazor
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -16,6 +17,23 @@
 <body>
     <Routes />
     <script src="_framework/blazor.web.js"></script>
+    <MudThemeProvider Theme="customTheme" />
+    @code {
+        private MudTheme customTheme = new MudTheme()
+        {
+            PaletteDark = new PaletteDark(),
+            PaletteLight = new PaletteLight
+            {
+                Primary = "#6A5ACD", // Purple color to match your image
+                PrimaryDarken = "#5849c7",
+                Secondary = "#03DAC6",
+                AppbarBackground = "#6A5ACD",
+                Background = "#FFFFFF",
+                Surface = "#FFFFFF",
+                DrawerBackground = "#FFFFFF",
+            }
+        };
+    }
 </body>
 
 </html>
